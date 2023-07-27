@@ -1,3 +1,7 @@
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                Defines Module Metadata of the Hyperverse Smart Modules.
+ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ *
+
 /**
 
 ## The Decentology Smart Module standard on Ethereum
@@ -13,18 +17,22 @@ in respect to Cadence:
 
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.0;
+pragma solidity >=0.6.0 <0.9.0; //^0.8.0;
 
 abstract contract IHyperverseModule {
     ModuleMetadata public metadata;
     address private owner;
 
     struct ModuleMetadata {
-        bytes title;
-        address author;
+        bytes title; // <-- `pub var title: String` in Cadence
+        Author author;
         bytes version;
-        uint256 publishedAt;
-        bytes externalLink; 
+        uint64 publishedAt;
+        bytes externalLink; // <-- can't be "external" in Solidity because it's a keyword
+    }
+
+    struct Author {
+        address authorAddress; // <-- can't be "address" in Solidity because it's a keyword
+        string externalLink;
     }
 }
-    

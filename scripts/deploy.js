@@ -1,65 +1,88 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-const hre = require('hardhat');
-const fs = require('fs-extra');
-const path = require('path');
-const { constants } = require('ethers');
+const hre = require("hardhat"); // Hardhat runtime emvironment
+const { ethers, run, network } = require("hardhat"); 
+const fs = require("fs-extra");
+const { constants } = require("ethers"); // Pull from ethers by desctructuring?!
 
-require('dotenv').config();
-async function main() {
-	const [deployer] = await ethers.getSigners();
-	const hyperverseAdmin = deployer.address;
-	console.log('Deploying contracts with the account:', deployer.address);
-	console.log('Account balance:', (await deployer.getBalance()).toString());
+const main = async () => {
+  const [deployer] = await ethers.getSigners(); // enum?? how are we signing the deployment Tx?
+  console.log("Deployer Address: ", deployer.address);
+  const hyperverseAdmin = deployer.address;
 
-	const NFT = await ethers.getContractFactory('ERC721');
-	const nftContract = await NFT.deploy(hyperverseAdmin);
-	await nftContract.deployed();
+  const BYOM = await hre.ethers.getContractFactory("BYOM"); // don't confuse getContractFactory with BYOMFactory
+  const byom = await BYOM.deploy(hyperverseAdmin);
+  await byom.deployed();
+  console.log("BYOM Contract deployed to: ", byom.address);
+  console.log(network.config);
 
-	const NFTFactory = await ethers.getContractFactory('ERC721Factory');
-	const nftFactoryContract = await NFTFactory.deploy(nftContract.address, hyperverseAdmin);
-	await nftFactoryContract.deployed();
+  // VERIFYING THE MASTERCONTRACT PROGRAMATICALLY ON A BLOCK EXPLORER (using HH and HH plug-ins)
+  if (network.config.chainId === 4 && process.env.ETHERSCAN_API_KEY) {
+    // NB: === means == without type conversion allowed. 4 is for Rinkby (?)
+    await byom.getDeployTransaction.wait(6); // wait 6 block confirmations before verifying
+    await verify(byom.address, Owner); // await needed as verify() is async function
+    // Owner is constructor argument. Add all args contained in the construcor
+    const currentValue = await byom.retrieve(); // right function here?! maybe not.
+    console.log(`Current Value is : ${currentValue}`); // string interpolation
+    // Update the currentValue
+  }
 
-	console.log(`[${hre.network.name}] NFT Contract deployed to: ${nftContract.address}`);
-	console.log(`[${hre.network.name}] NFT Factory deployed to: ${nftFactoryContract.address}`);
+  const Factory = await hre.ethers.getContractFactory("BYOMFactory");
+  const byomFactory = await Factory.deploy(byom.address, hyperverseAdmin);
+  await byomFactory.deployed();
+  console.log("BYOMFactory Contract deployed to: ", byomFactory.address);
+  
+  // VERIFYING THE FABRICCONTRACT PROGRAMATICALLY ON A BLOCK EXPLORER
+  if (network.config.chainId === 4 && process.env.ETHERSCAN_API_KEY) {
+    await byomFactory.getDeployTransaction.wait(6); // wait 6 block confirmation before verifying
+    await verify(byomFactory.address, masterContract, owner);
+  }
 
-	const env = JSON.parse(fs.readFileSync('contracts.json').toString());
-	env[hre.network.name] = env[hre.network.name] || {};
-	env[hre.network.name].testnet = env[hre.network.name].testnet || {};
+  const env = JSON.parse(fs.readFileSync("contracts.json").toString());
+  env[hre.network.name] = env[hre.network.name] || {};
+  env[hre.network.name].testnet = env[hre.network.name].testnet || {};
 
-	env[hre.network.name].testnet.contractAddress = nftContract.address;
-	env[hre.network.name].testnet.factoryAddress = nftFactoryContract.address;
+  env[hre.network.name].testnet.contractAddress = byom.address;
 
-	// Save contract addresses back to file
-	fs.writeJsonSync('contracts.json', env, { spaces: 2 });
-	if (process.env.LOCALDEPLOY) {
-		let proxyAddress = constants.AddressZero;
-		const instanceTnx = await nftFactoryContract.createInstance(
-			deployer.address,
-			'Test',
-			'TST'
-		);
-		instanceTnx.wait();
-		console.log('Instance Created', instanceTnx.hash);
-		while (proxyAddress === constants.AddressZero) {
-			try {
-				proxyAddress = await nftFactoryContract.getProxy(deployer.address);
-			} catch (error) {
-				proxyAddress = constants.AddressZero;
-			}
-		}
-	}
+  // Step 3: UPDATE moduleFactory
+  env[hre.network.name].testnet.factoryAddress = byomFactory.address;
+
+  // Save contract addresses back to file
+  fs.writeJsonSync("contracts.json", env, { spaces: 2 }); // { spaces:2 } ??
+
+  // Deploy default tenant
+  let proxyAddress = constants.AddressZero;
+  await byomFactory.createInstance(deployer.address);
+  while (proxyAddress === constants.AddressZero) {
+    s;
+    proxyAddress = await byomFactory.getProxy(deployer.address);
+  }
+};
+
+// DEFINING THE verify()FUNCTION.  Using hardhat's verify task to verify the contract
+async function verify(contractAddress, Owner) {
+  console.log("Verifying contract, please wait ...");
+  try {
+    await run("verify: verify", {     /* run allows to run any hardhat task.*/
+      address: contractAddress,
+      constructorArguments: Owner,
+    });
+  } catch (e) {
+    if (e.message.toLowerCase().include("already verfied")) {
+      console.log("Already Verified!");
+    } else {
+      console.log(e);
+    }
+  }
 }
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main()
-	// .then(() => process.exit(0))
-	.catch((error) => {
-		console.error(error);
-		process.exit(1);
-	});
 
-module.exports = { main };
+const runMain = async () => {
+  // declaring the runMain() function
+  try {
+    await main(); //wait for main() terminates before proceeding
+    process.exit(0);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
+
+runMain(); // calling the runMain() function when exec deploy.js

@@ -1,0 +1,6 @@
+{
+    "solidity.compileUsingRemoteVersion": "v0.8.6+commit.3f05b770",
+    "solidity.enableLocalNodeCompiler": false,
+    "solidity.defaultCompiler": "compileUsingRemoteVersion",
+    "solidity-language-server.trace.server.verbosity": "verbose"
+}

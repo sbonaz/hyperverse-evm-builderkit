@@ -1,0 +1,95 @@
+ npm add --dev solidity-coverage
+ npm install hardhat-gas-reporter --save-dev
+ npm install --save-dev @nomiclabs/hardhat-etherscan
+ npm install -g ts-node
+
+
+
+
+ node merge-fixer-packets.js
+ npx hardhat clean // or just delete cache and artifacts folders
+ npx hardhat console --network localhost ./utils/storeRetrieveNumber.sol
+ npm hardhat console --network localhost
+ npx hardhat node "&" wait-on tcp:8545
+ npm hardhat run node 
+ ts-node index.ts  
+ ts-node --version
+ Get-History | Format-List -Property *
+ Clear-History -Count 36
+ Clear-History -count 1  
+ about_History
+ yarn solcjs --bin --abi --include-path node-modules/ --base-path . -o . BYOM.sol
+ npx hardhat   // to see what we can do with Hardhat
+ npm install --include=dev hardhat-deploy
+
+pnpm solcjs --bin --abi --include-path node_modules/ --base-path . -o . ./contracts/BYOM.sol
+
+
+ // To give our contract correct typing, in TS file, we use a tool called Typechain., HH plug-in
+
+ npm install --save-dev typechain @typechain/hardhat @typechain/ethers-v5
+ npx hardhat typechain  // this gonna create the folder typechain-types
+
+ npx solhint contracts/*.sol  
+ yarn add --dev  @chainlink/contracts
+ np
+
+
+
+
+ Extra:
+
+ https://www.decentology.com/blog/composing-the-hyperverse 
+ https://youtu.be/E_FXd_rD7uY   --> AMA
+https://twitter.com/hyperverse_dao/status/1556143814972170242?s=21&t=FE4eRXIGOe2k5afsQi3xPQ
+
+ https://twitter.com/hyperverse_dao/status/1557063644420136962?s=21&t=C12dfIGPJymWEBWSuXH_VQ
+https://www.decentology.com/blog/can-you-build-basic-commerce-modules-using-the-hyperverse
+https://youtu.be/okdm61Q-S50
+https://www.vulcanblockchain.com/
+
+
+
+
+
+
+DEFI Hackathon ideas:
+https://docs.google.com/presentation/d/e/2PACX-1vTLZe804He36Gods0FGjcapkf1QVpyn95pQbGwM-pPsGSTnvQZuR702rKdIQTa5CcxtigspaSaNP6QJ/pub?start=false&loop=false&delayms=3000
+https://github.com/decentology/SafuuX-DeFi-Hackathon/network/members
+here is the page with all the links: https://github.com/decentology/SafuuX-DeFi-Hackathon/blob/main/README.md
+Visit here https://www.hyperverse.dev/defihackathon and you can submit your project via the relevant links
+submission form with instructions: https://docs.google.com/forms/d/1UP01XVjUcQRc2mtRxQkxKDoziD7Gcu07agf0vxnyIMo/edit
+Submit you ideas, in the form of a 2-min YouTube video via https://t.co/5RM08OEuWd
+
+
+https://www.youtube.com/watch?v=iNhNw1JhQHQ
+https://www.youtube.com/watch?v=3klrfQZtxqg&ab_channel=TheHyperversebyDecentology
+https://twitter.com/hyperverse_dao/status/1580948118702788609
+https://docs.hyperverse.dev/basics/modules
+
+
+https://twitter.com/hyperverse_dao/status/1607963711204892673?s=20&t=-yQyggCIXvjSiMJFXUvaVA (deadline  on 20 Fev announcement)
+https://twitter.com/randallflagg311/status/1585322391978352640?s=46&t=Q9SrUZg-I--SPYe-fHoBRA (first workshop hackathon SafuuX)
+
+
+Ideas to complete my BYOM.sol
+
+Rob had some questions around building some basic commerce Smart Modules when creating a blockchain game.
+In a game, a user might have to buy tokens in-game or through a website, so one might need to track deposits, and also transfer them over to the main platform wallet. Can the Hyperverse perform functions such as creating wallet addresses and adding web hook triggers when a deposit has been made?
+-----------------
+
+In an essence, any functionality that a Smart Module developer decides to build on the Hyperverse is usable by JavaScript developers. So, here are Nik's answers:
+
+A) Can the Hyperverse be used to create wallet addresses for deposits?
+This is not a dApp function, you'd do this at the wallet level and obtain a private key and its corresponding address
+‍
+B) Can one use the Hyperverse to retrieve a deposit wallet address?
+You'd actually use a function in the Smart Module (maybe something like "updateDepositAccount") to tell the contract what the deposit account should be. This is flexible and allows an authorized user to change the address.
+
+C) Can you use the Hyperverse to add a web hook trigger to send a notification when funds have been deposited?
+The Hyperverse JS abstraction does provide you the ability to respond to blockchain events in your client-side React code. You can add code to handle notifications.
+
+D) Can the Hyperverse be used to Send / Transfer fund(s) to another wallet?
+Send/receive funds are basic features of ERC-20 contracts, so yes, this is feasible
+
+

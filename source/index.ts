@@ -1,7 +1,13 @@
-export * from './types';
-export const ModuleName = 'ERC721';
-export { ERC721Library } from './erc721Library';
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+   TS  Handles imports and exports for JavaScript API.
+ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 
-export const ERC721 = {
-	ModuleName,
+export { useModule } from "./useHook";
+import { Provider } from "./Provider";
+export { Provider } from "./Provider";
+export const ModuleName = "CustomModule";
+export { ModuleLibrary } from "./byomLibrary";
+export const CustomModule = {
+  Provider,
+  ModuleName,
 };

@@ -1,0 +1,10 @@
+{
+    "chains": {
+
+        "name": "Catalog",
+        "url": "https://rpc.url.com/yoururl", 
+        "chainId": 12345, 
+        "port": 18514 
+    }
+    
+}

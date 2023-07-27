@@ -1,0 +1,165 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\Lenovo\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add solcjs 8.5.0
+
+PATH: 
+  C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Java\jre1.8.0_131\bin;C:\Program Files\MySQL\MySQL Utilities 1.6\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files (x86)\IBM\Cloud\bin;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Users\Lenovo\AppData\Local\pnpm;C:\Users\Lenovo\AppData\Local\Programs\Python\Python310\Scripts\;C:\Users\Lenovo\AppData\Local\Programs\Python\Python310\;C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Java\jre1.8.0_131\bin;C:\Program Files\MySQL\MySQL Utilities 1.6\;C:\Program Files\Git\cmd;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files (x86)\IBM\Cloud\bin;C:\Program Files\nodejs\;"C:\Users\Lenovo\AppData\Local\Microsoft\WindowsApps; C:\kubectl.exe";C:\apache-maven-3.5.2\bin;C:\Users\Lenovo\AppData\Local\Microsoft\WindowsApps;C:\Users\Lenovo\AppData\Local\GitHubDesktop\bin;C:\Users\Lenovo\AppData\Roaming\Flow;C:\Users\Lenovo\AppData\Roaming\npm;C:\Users\Lenovo\AppData\Local\Programs\Microsoft VS Code\bin
+
+Yarn version: 
+  1.22.18
+
+Node version: 
+  16.14.2
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/solcjs: Not found
+      at Request.params.callback [as _callback] (C:\Users\Lenovo\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:66138:18)
+      at Request.self.callback (C:\Users\Lenovo\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140883:22)
+      at Request.emit (node:events:526:28)
+      at Request.<anonymous> (C:\Users\Lenovo\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141855:10)
+      at Request.emit (node:events:526:28)
+      at IncomingMessage.<anonymous> (C:\Users\Lenovo\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141777:12)
+      at Object.onceWrapper (node:events:645:28)
+      at IncomingMessage.emit (node:events:538:35)
+      at endReadableNT (node:internal/streams/readable:1345:12)
+      at processTicksAndRejections (node:internal/process/task_queues:83:21)
+
+npm manifest: 
+  {
+  	"name": "@decentology/hyperverse-evm-builderkit",
+  	"version": "1.2.0",
+  	"source": "./source/index.ts",
+  	"types": "./distribution/index.d.ts",
+  	"main": "./distribution/index.js",
+  	"license": "MIT",
+  	"exports": {
+  		".": {
+  			"import": "./source/index.ts"
+  		},
+  		"./react": {
+  			"import": "./source/react/index.ts"
+  		}
+  	},
+  	"scripts": {
+  		"test": "hardhat test",
+  		"build": "rollup --config node:@decentology/config/rollup.config.js",
+  		"clean": "rimraf ./distribution",
+  		"compile": "hardhat compile",
+  		"deploy": "run-p deploy-ethereum deploy-metis deploy-avalanche deploy-polygon deploy-celo",
+  		"deploy-ethereum": "hardhat run scripts/deploy.js --network ethereum ",
+  		"deploy-metis": "hardhat run scripts/deploy.js --network metis",
+  		"deploy-avalanche": "hardhat run scripts/deploy.js --network avalanche",
+  		"deploy-polygon": "hardhat run scripts/deploy.js --network polygon",
+  		"deploy-celo": "hardhat run scripts/deploy.js --network celo",
+  		"lint": "tsc --noEmit",
+  		"storybook": "start-storybook -p 6006",
+  		"preview": "STORYBOOK_NETWORK=rinkeby build-storybook && cd storybook-static && 7z a -mx=9 publish.zip . ../.azure/. && az webapp deployment source config-zip --resource-group samples --name dappstarter-samples --src publish.zip",
+  		"build-storybook": "build-storybook"
+  	},
+  	"publishConfig": {
+  		"access": "public",
+  		"exports": {
+  			".": "./distribution/index.js",
+  			"./react": "./distribution/react.mjs"
+  		}
+  	},
+  	"peerDependencies": {
+  		"react": "^17.0.0 || ^18.0.0",
+  		"react-dom": "^17.0.0 || ^18.0.0"
+  	},
+  	"files": [
+  		"distribution",
+  		"react.d.ts"
+  	],
+  	"engines": {
+  		"node": ">=12.0.0"
+  	},
+  	"dependencies": {
+  		"@decentology/hyperverse": "^1.2.0",
+  		"@decentology/hyperverse-evm": "^1.2.0",
+  		"@decentology/unstated-next": "^1.2.0",
+  		"@openzeppelin/contracts": "^4.7.2",
+  		"eslint": "^8.32.0",
+  		"ethers": "^5.6.9",
+  		"node-fetch": "^3.3.0",
+  		"real-cancellable-promise": "^1.1.1",
+  		"require-from-string": "^2.0.2",
+  		"solhint": "^3.3.8",
+  		"webpack": "^5.75.0"
+  	},
+  	"devDependencies": {
+  		"@babel/core": "^7.18.10",
+  		"@decentology/config": "^1.2.0",
+  		"@ethersproject/abstract-provider": "^5.6.1",
+  		"@nomiclabs/hardhat-ethers": "^2.1.0",
+  		"@nomiclabs/hardhat-etherscan": "^3.1.5",
+  		"@nomiclabs/hardhat-waffle": "^2.0.3",
+  		"@storybook/addon-actions": "^6.5.10",
+  		"@storybook/addon-console": "^1.2.3",
+  		"@storybook/addon-docs": "^6.4.22",
+  		"@storybook/addon-essentials": "^6.4.22",
+  		"@storybook/addon-interactions": "^6.5.10",
+  		"@storybook/addon-links": "^6.5.10",
+  		"@storybook/addons": "^6.5.10",
+  		"@storybook/builder-webpack5": "^6.5.10",
+  		"@storybook/cli": "^6.5.10",
+  		"@storybook/csf": "0.0.2--canary.4566f4d.1",
+  		"@storybook/manager-webpack5": "^6.5.10",
+  		"@storybook/react": "^6.1.21",
+  		"@storybook/testing-library": "^0.0.13",
+  		"@storybook/theming": "^6.5.10",
+  		"@types/mdx": "^2.0.2",
+  		"@types/node": "^18.6.5",
+  		"@types/react": "18.0.17",
+  		"babel-loader": "^8.2.5",
+  		"babel-plugin-react-require": "^3.1.3",
+  		"chai": "^4.3.6",
+  		"ethereum-waffle": "^3.4.4",
+  		"fs-extra": "^10.1.0",
+  		"hardhat": "^2.12.6",
+  		"hardhat-gas-reporter": "^1.0.9",
+  		"http-proxy-middleware": "^2.0.6",
+  		"node-watch": "^0.7.3",
+  		"npm-run-all": "^4.1.5",
+  		"react": "^18.2.0",
+  		"react-dom": "^18.2.0",
+  		"rimraf": "^3.0.2",
+  		"solidity-coverage": "^0.8.2",
+  		"typescript": "^4.7.4",
+  		"wait-on": "^6.0.1"
+  	},
+  	"pnpm": {
+  		"overrides": {
+  			"flat@<5.0.1": ">=5.0.1",
+  			"node-fetch@<2.6.7": ">=2.6.7",
+  			"trim-newlines@<3.0.1": ">=3.0.1",
+  			"trim@<0.0.3": ">=0.0.3",
+  			"node-fetch@<2.6.1": ">=2.6.1",
+  			"loader-utils@>=2.0.0 <2.0.4": ">=2.0.4",
+  			"loader-utils@>=1.0.0 <1.4.2": ">=1.4.2",
+  			"loader-utils@<1.4.1": ">=1.4.1",
+  			"loader-utils@>=2.0.0 <2.0.3": ">=2.0.3",
+  			"@openzeppelin/contracts@>=4.1.0 <4.7.3": ">=4.7.3",
+  			"decode-uri-component@<0.2.1": ">=0.2.1",
+  			"yargs-parser@<=5.0.0": ">=5.0.1",
+  			"glob-parent@<5.1.2": ">=5.1.2",
+  			"json5@<1.0.2": ">=1.0.2",
+  			"json5@>=2.0.0 <2.2.2": ">=2.2.2",
+  			"deep-object-diff@>=1.1.6 <1.1.9": ">=1.1.9",
+  			"got@<11.8.5": ">=11.8.5",
+  			"lodash@<4.17.21": ">=4.17.21",
+  			"underscore@>=1.3.2 <1.12.1": ">=1.12.1",
+  			"cookiejar@<2.1.4": ">=2.1.4",
+  			"minimatch@<3.0.5": ">=3.0.5",
+  			"async@>=2.0.0 <2.6.4": ">=2.6.4"
+  		}
+  	}
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

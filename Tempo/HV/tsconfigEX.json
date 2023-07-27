@@ -1,0 +1,14 @@
+{
+  "extends": "@decentology/config/react-library.json",
+  "include": [
+    "source/**/*.ts",
+    "source/**/*.tsx",
+    "artifacts/**/*.json",
+    "./*.json"
+  ],
+  "exclude": ["distribution", "node_modules"],
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "composite": false
+  }
+}
