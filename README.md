@@ -31,3 +31,14 @@ For more information and learn about Hyperverse checkout the resources below
 
 - [Hyperverse Documentation](https://docs.hyperverse.dev/)
 - [Decentology YouTube Channel](https://www.youtube.com/c/Decentology)
+
+# Working on Git (Reminder)
+
+## Creating a new branch
+
+
+## Updating a branch
+
+
+
+
