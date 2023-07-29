@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
+
 /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SOLIDITY VERSIONS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
-pragma solidity >=0.6.12 <0.9.0; // 0.8.6
+pragma solidity >=0.6.0 <0.9.0; //^0.8.0;
 // pragma abicoder v2; // @Me:Application Binary Interface Encoder v2.
 // Note: pragma experimental ABIEncoderV2 is depredicated as of 0.8.0
-/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ IMPORTS (INTERFACES & LIBRARIES) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ IMPORTS (CONTRACTS; INTERFACES & LIBRARIES) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 import "./interfaces/IERC20.sol";
 // totalSupply(), balanceOf(address account), transfer(address to, uint256 amount), allowance(address owner, address spender),
 // approve(address spender, uint256 amount),  function transferFrom(address from, address to, uint256 amount ) : all External.
@@ -18,22 +20,38 @@ import "./utils/AggregatorV3Interface.sol";
 //  interface at https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol
 import "./utils/PriceConverter.sol"; // getPrice() internal, getConversionRate(uint256 ethAmount)  internal
 
-/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CONTRACT DEFINITION  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CONTRACT + INHERITANCE  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 contract BYOM is
-    IERC20,
-    Initializable,
-    IHyperverseModule //  interfaces inherited from
+    IERC20, //  interface 1 inherited from
+    IHyperverseModule, //  interface 2 inherited from
+    Initializable //  library inherited from
 {
-    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 1.  STATE VARIABLES DEFINITION  @@@@@@@@@@@@@@@@@@@@@@@@@@ */
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 0.  TYPPING  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+    using PriceConverter for uint256; //using a Library
+    // Possible to define custom types with struct{} and Enum
 
-    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> KEY ACCOUNTS (PERSONAS) + LIST + DICTIONARY <<<<<<<<<<<<<<<<<<<<<<<<<*/
-    /*  @Me: Address of the owner (who deployed the contract). 
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 1. IMMUTABLE & CONSTANT VARIABLES DEFINITION  @@@@@@@@@@@@@@@@@@@@@@@@@@ */
+    /* this variables are gaz effiscient as, stored in the byte code of the SC, dirrectly.
+      @Me: Address of the owner (who deployed the contract). 
                  It's deployer's EVM compatible public address (@Me: get it from Metamask/Core for instance)
                  Default is address(0) or
-                 (sbo): 0x45122452bc2f826b1e6738ff187AcB8a43bfF891 | (mve): 0x4264E741C74F8c2873fC491fa0e2193aeFF26E31
-        */
+                 (sbo/MM): 0x45122452bc2f826b1e6738ff187AcB8a43bfF891 | (mve): 0x4264E741C74F8c2873fC491fa0e2193aeFF26E31
+    */
     address public immutable i_owner;
     // @Me: stores the tenant owner (persona who will instanciate this smart contract for resuse in multi-tenancy context such on Hyperverse)
+    uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
+    uint256 public constant UNIT_MULTIPLIER; // 10**18  to get Wei?    // Multiplier to convert to smallest unit
+    uint256 public constant decimals;
+    uint256 public constant initialSupply; // Tokens created when contract was deployed
+    string public constant currencyName;
+    string public constant symbol;
+    uint256 public override totalSupply; // Tokens currently in circulation (VarCap or FixedCap?)
+
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 2.  STATE VARIABLES DEFINITION  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+
+    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> KEY ACCOUNTS (PERSONAS) + LIST + DICTIONARY <<<<<<<<<<<<<<<<<<<<<<<<<*/
+    string public pegCurr;
+    string public pegRate;
     address private _tenantOwner; // @Me: "private", address only visible to the tenant (instant of the smart module) owner
     // End User addresses of the TENANT service, enrolled at the Location X (LocX). Using TENANT Services to pay or/and transfer money
     // We'll create an enum with all following types of users in Typescrypt App.
@@ -49,27 +67,19 @@ contract BYOM is
     address public _tenantAuthority;
     // List of addresses who deposited
     address[] public tenantDepositors;
-    uint256 public constant MINIMUM_USD = 5 * 10 ** 18; // constant? reserve keyword?
-
     // Storing balances (list of balance of each user's address index )
-    mapping(address => uint256) balances;
-    using PriceConverter for uint256; //using a Library
-    //mapping to store which address deposited how much ETH
-    mapping(address => uint256) public addressToAmountDeposited; // dictionary
     address[] public depositors; // List
 
+    /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAPPINGS <<<<<<<<<<<<<<<<<<<<<<<<<*/
+    mapping(address => uint256) balances;
+    //mapping to store which address deposited how much ETH
+    mapping(address => uint256) public addressToAmount; // dictionary
+
     /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CHAIN CURRENCY's VARIABLES (constants) DEFINITION  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
-    string public currencyName;
-    string public symbol;
-    string public pegCurr;
-    string public pegRate;
-    uint256 public decimals;
-    uint256 public override totalSupply; // Tokens currently in circulation (VarCap or FixedCap?)
-    uint256 public initialSupply; // Tokens created when contract was deployed
-    uint256 public UNIT_MULTIPLIER; // 10**18  to get Wei?    // Multiplier to convert to smallest unit
+
     mapping(address => mapping(address => uint256)) internal allowed; // Approval granted to transfer tokens from one address to another.
 
-    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 2. E V E N T S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 3. E V E N T S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
     // Events allow clients to react to specific contract changes we declare
     ///+events                          // emit eventName();
     event DepositRecieved(address _to, uint256 _amount);
@@ -90,7 +100,7 @@ contract BYOM is
 
     // Customs errors that describe failures.
     /// +errors
-    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 3. E R R O R S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 4. E R R O R S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 
     error Unauthorized();
     error AlreadyInitialized();
@@ -120,7 +130,7 @@ contract BYOM is
     error cftNotOk();
     error NotCompliant();
 
-    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 4.  M O D I F I E R S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 5.  M O D I F I E R S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
     // modifier: https://medium.com/coinmonks/solidity-tutorial-all-about-modifiers-a86cf81c14cb
     // Pattern: if() {revert errorName()} instead of require(condition, "description") as of v0.8.4;
 
@@ -212,7 +222,7 @@ contract BYOM is
     //// receive      (488)
     //// fallback     (493)
 
-    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 5. C O N S T R U C T O R @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 6. C O N S T R U C T O R @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> F0: INIT1 -> Smart Module Metadata setting <<<<<<<<<<<<<*/
     constructor(address _i_owner) public {
@@ -275,7 +285,7 @@ contract BYOM is
         );
     }
 
-    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 6. T E N A N T  F U N C T I O N S (13 as of jan 2023) @@@@@@@@@@@@@@@@@@@@@@@@ */
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 7. T E N A N T  F U N C T I O N S (13 as of jan 2023) @@@@@@@@@@@@@@@@@@@@@@@@ */
     /// +functions   // function? functionName (?) visibility view? pure? payable? virtual? override? returns(?) {... return() }
 
     /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> F2 -> INCREASING THE TOKEN SUPPLY (MINTING) (external) <<<<<<<<<<<<< */
@@ -320,7 +330,7 @@ contract BYOM is
             "You need to add more ETH!"
         );
         //if not, add to mapping and depositors array
-        addressToAmountDeposited[msg.sender] += msg.value;
+        addressToAmount[msg.sender] += msg.value;
         tenantDepositors.push(msg.sender);
     }
 
@@ -422,7 +432,7 @@ contract BYOM is
             depositorIndex++
         ) {
             address depositor = tenantDepositors[depositorIndex];
-            addressToAmountDeposited[depositor] = 0;
+            addressToAmount[depositor] = 0;
         }
         // tenantDepositors list will be initialized to 0
         tenantDepositors = new address[](0);
@@ -516,4 +526,33 @@ contract BYOM is
     /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ O V E R R I D E S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
     /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ E R C 20   M E T H O D S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+
+    /*
+
+Here's a breakdown of the code:
+
+1.	Pragmas: The contract specifies the Solidity version it is compatible with, 
+
+2.	Imports: Several external contracts are imported, 
+
+3.	State Variables:
+
+4.	Mappings:
+
+5.	Immutable Variables:
+
+6.	Events:
+
+7.	Errors:
+
+8.	Modifiers:
+
+9.	Constructor:
+
+10.	Functions:
+
+11. Receive and Fallback Functions:
+
+
+*/
 }

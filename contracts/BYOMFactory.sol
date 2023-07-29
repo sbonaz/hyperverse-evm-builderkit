@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.9.0; //^0.8.6;                        // Carrot character to specify minimum compatible version number
+pragma solidity  >=0.6.0 <0.9.0; //^0.8.0;                        // Carrot character to specify minimum compatible version number
 pragma experimental ABIEncoderV2;
 
 import "./hyperverse/CloneFactory.sol";  // CloneFactory article: https://medium.com/coinmonks/delegatecall-calling-another-contract-function-in-solidity-b579f804178c
@@ -15,6 +15,13 @@ import "hardhat/console.sol";
         //
     /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 
+
+    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ E R R O R S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+
+    error Unauthorized();
+    error InstanceAlreadyInitialized();
+    error InstanceDoesNotExist();
+    error ZeroAddress();
 
 contract BYOMFactory is CloneFactory {               // heritage
     using Counters for Counters.Counter;             // property from imported Library
@@ -39,13 +46,6 @@ contract BYOMFactory is CloneFactory {               // heritage
     /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ E V E N T S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
     event TenantCreated(address _tenant, address _proxy);
-
-    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ E R R O R S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-
-    error Unauthorized();
-    error InstanceAlreadyInitialized();
-    error InstanceDoesNotExist();
-    error ZeroAddress();
 
     /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ M O D I F I E R S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 

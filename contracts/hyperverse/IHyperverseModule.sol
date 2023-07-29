@@ -8,10 +8,9 @@
 
 ## `IHyperverseModule` interface
 
-In essense, this contract serves the equivalent of two purposes
-in respect to Cadence:
-1) Enforces the `metadata` variable (same as IHyperverseModule.cdc)
-2) Defines what a ModuleMetadata is (sam as HyperverseModule.cdc)
+In essense, this contract serves two purposes:
+1) Enforces the `metadata` variable
+2) Defines what a ModuleMetadata is 
 
 */
 
@@ -19,10 +18,9 @@ in respect to Cadence:
 
 pragma solidity >=0.6.0 <0.9.0; //^0.8.0;
 
-abstract contract IHyperverseModule {
-    ModuleMetadata public metadata;
-    address private owner;
+// pragma experimental ABIEncoderV2;  this pragma is not needed in this contract, and has been removed since version 0.8.0.
 
+abstract contract IHyperverseModule {
     struct ModuleMetadata {
         bytes title; // <-- `pub var title: String` in Cadence
         Author author;
@@ -30,9 +28,12 @@ abstract contract IHyperverseModule {
         uint64 publishedAt;
         bytes externalLink; // <-- can't be "external" in Solidity because it's a keyword
     }
-
     struct Author {
         address authorAddress; // <-- can't be "address" in Solidity because it's a keyword
         string externalLink;
     }
+
+    // ModuleMetadata public metadata;
+    ModuleMetadata metadata;
+    address private owner;
 }
