@@ -32,8 +32,8 @@ For more information and learn about Hyperverse checkout the resources below
 - [Hyperverse Documentation](https://docs.hyperverse.dev/)
 - [Decentology YouTube Channel](https://www.youtube.com/c/Decentology)
 
-# Working on Git (Reminder)
-
+# Working on Git (Reminder) 
+==> https://github.com/sbonaz/MasteringAvalanche.git
 ## Creating a new branch
 
 
