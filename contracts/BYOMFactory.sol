@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity  >=0.6.0 <0.9.0; //^0.8.0;                        // Carrot character to specify minimum compatible version number
-pragma experimental ABIEncoderV2;
 
 import "./hyperverse/CloneFactory.sol";  // CloneFactory article: https://medium.com/coinmonks/delegatecall-calling-another-contract-function-in-solidity-b579f804178c
 import "./hyperverse/IHyperverseModule.sol";

@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SOLIDITY VERSIONS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 0.1. SOLIDITY VERSIONS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 pragma solidity >=0.6.0 <0.9.0; //^0.8.0;
-// pragma abicoder v2; // @Me:Application Binary Interface Encoder v2.
-// Note: pragma experimental ABIEncoderV2 is depredicated as of 0.8.0
+// pragma abicoder v2; // @Me:Application Binary Interface Encoder v2. Depricated as version 0.8.0
 
-/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ IMPORTS (CONTRACTS; INTERFACES & LIBRARIES) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 0.2. IMPORTS (CONTRACTS; INTERFACES & LIBRARIES) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 import "./interfaces/IERC20.sol";
 // totalSupply(), balanceOf(address account), transfer(address to, uint256 amount), allowance(address owner, address spender),
 // approve(address spender, uint256 amount),  function transferFrom(address from, address to, uint256 amount ) : all External.
@@ -22,11 +21,11 @@ import "./utils/PriceConverter.sol"; // getPrice() internal, getConversionRate(u
 
 /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CONTRACT + INHERITANCE  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 contract BYOM is
-    IERC20, //  interface 1 inherited from
-    IHyperverseModule, //  interface 2 inherited from
-    Initializable //  library inherited from
+    IERC20, //  Inheritance1
+    IHyperverseModule, //  Inheritance2
+    Initializable //  library1
 {
-    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 0.  TYPPING  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 0.3.  TYPPING  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
     using PriceConverter for uint256; //using a Library
     // Possible to define custom types with struct{} and Enum
 
@@ -37,8 +36,11 @@ contract BYOM is
                  Default is address(0) or
                  (sbo/MM): 0x45122452bc2f826b1e6738ff187AcB8a43bfF891 | (mve): 0x4264E741C74F8c2873fC491fa0e2193aeFF26E31
     */
+    /* @Me: contract's owner definition 
+    (the persona who will instanciate this smart contract for resuse in multi-tenancy context such as on Hyperverse)
+   */
     address public immutable i_owner;
-    // @Me: stores the tenant owner (persona who will instanciate this smart contract for resuse in multi-tenancy context such on Hyperverse)
+    // chain currency's variables definition.
     uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
     uint256 public constant UNIT_MULTIPLIER; // 10**18  to get Wei?    // Multiplier to convert to smallest unit
     uint256 public constant decimals;
@@ -71,13 +73,15 @@ contract BYOM is
     address[] public depositors; // List
 
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAPPINGS <<<<<<<<<<<<<<<<<<<<<<<<<*/
-    mapping(address => uint256) balances;
     //mapping to store which address deposited how much ETH
     mapping(address => uint256) public addressToAmount; // dictionary
+    //mapping to retrieve a balance for a specific address
+    mapping(address => uint256) balances;
 
     /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CHAIN CURRENCY's VARIABLES (constants) DEFINITION  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< */
 
-    mapping(address => mapping(address => uint256)) internal allowed; // Approval granted to transfer tokens from one address to another.
+    // Approval granted to transfer tokens from one address to another.
+    mapping(address => mapping(address => uint256)) internal allowed;
 
     /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 3. E V E N T S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
     // Events allow clients to react to specific contract changes we declare
@@ -125,6 +129,7 @@ contract BYOM is
     error PosMaxPerWeekExceeded();
     error PosMaxPerMonthExceeded();
     error PosMaxPerYearExceeded();
+    error MiniAmountNotOk();
     error KycNotOk();
     error amlNotOk();
     error cftNotOk();
@@ -193,6 +198,11 @@ contract BYOM is
         }
         _;
     }
+    modifier minimumRequire() {
+        if (msg.value.getConversionRate() < MINIMUM_USD)
+            revert MiniAmountNotOk();
+        _;
+    }
 
     /*
     modifier onlyKyced() {
@@ -207,28 +217,13 @@ contract BYOM is
     }
     */
 
-    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-    // Functions Order:
-    //// constructor           (215) 0
-    //// initialize            (233) 1
-    //// external              (297) 2 (310) 3
-    //// public                (359) (367) (377) (353) (374)  (406)
-    //// public override       (461) 8
-    //// public payable        (312) 4
-    //// public view           (329) 5 (337) 6 (347) 7
-    //// public view override
-    //// internal     (-)
-    //// private      (-)
-    //// receive      (488)
-    //// fallback     (493)
-
-    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 6. C O N S T R U C T O R @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-
     /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> F0: INIT1 -> Smart Module Metadata setting <<<<<<<<<<<<<*/
+    /* @Me: Constructor, special function that is executed only once during the deployment process.
+        Constructors are used to initialize the state variables 
+        and perform any other setup tasks required for the contract to function correctly.
+    */
     constructor(address _i_owner) public {
-        // @Me: Constructor, special function that is executed only once.
-
-        metadata = ModuleMetadata(
+        metadata = ModuleMetadata( // a structure define in IHyperverseModule interface
             "BYOM",
             Author(_i_owner, "https://externallink.net"),
             "0.0.1",
@@ -285,8 +280,8 @@ contract BYOM is
         );
     }
 
-    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 7. T E N A N T  F U N C T I O N S (13 as of jan 2023) @@@@@@@@@@@@@@@@@@@@@@@@ */
-    /// +functions   // function? functionName (?) visibility view? pure? payable? virtual? override? returns(?) {... return() }
+    /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 7. T E N A N T's  F U N C T I O N S (13 as of jan 2023) @@@@@@@@@@@@@@@@@@@@@@@@ */
+    /// +functions   // function? functionName () visibility view? pure? payable? virtual? override? returns(?) {... return() }
 
     /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> F2 -> INCREASING THE TOKEN SUPPLY (MINTING) (external) <<<<<<<<<<<<< */
     /* @dev Creates `amount` tokens and assigns them to tenantOwner, increasing the total supply.
@@ -321,15 +316,10 @@ contract BYOM is
     /*
      * @dev  Allow the user to deposit
      */
-    function deposit() public payable {
+    function deposit() public payable minimumRequire {
+        // @Me: payable function which needs to add minimum ETH
         // 18 digit number to be compared with deposited amount
-        uint256 minimumUSD = 50 * 10 ** 18;
-        //is the deposited amount less than 50USD?
-        require(
-            getConversionRate(msg.value) >= minimumUSD,
-            "You need to add more ETH!"
-        );
-        //if not, add to mapping and depositors array
+        uint256 minimumUSD = 5 * 10 ** 18; //the deposited amountis not less than 5 USD?
         addressToAmount[msg.sender] += msg.value;
         tenantDepositors.push(msg.sender);
     }
@@ -416,16 +406,11 @@ contract BYOM is
     }
 
     /* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> F10 -> ENTIERTY OF DEPOSIT WITHDRAW (public payable) <<<<<<<<<<<<< */
-    /*
-     * @dev  Allow the Owner to whithdrawl all deposits
-     * @Me: Only the owner of the contract can withdraw the ETH
-     */
+
+    // @Me: payable function to withdraw all the ETH from the contract, by the owner only
     function ownerWithdraw() public payable onlyOwner {
-        // The modifier is used here
-        // If you are using version prior eight (v0.8) of chainlink aggregator interface, you will need to change the code below to
-        // msg.sender.transfer(address(this).balance);
         payable(msg.sender).transfer(address(this).balance);
-        //iterate through all the mappings and make them 0 since all the deposited amount has been withdrawn
+        //iterate through the depositors list and make them 0 since all the deposited amount has been withdrawn
         for (
             uint256 depositorIndex = 0;
             depositorIndex < tenantDepositors.length;
@@ -434,7 +419,7 @@ contract BYOM is
             address depositor = tenantDepositors[depositorIndex];
             addressToAmount[depositor] = 0;
         }
-        // tenantDepositors list will be initialized to 0
+        // tenantDepositors list will be reset to 0
         tenantDepositors = new address[](0);
     }
 

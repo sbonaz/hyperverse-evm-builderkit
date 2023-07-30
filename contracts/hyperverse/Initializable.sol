@@ -75,9 +75,10 @@ abstract contract Initializable {
      */
     event Initialized(uint8 version);
 
-    /*
-     * @dev A modifier that defines a protected initializer function that can be invoked at most once. In its scope,
-     * `onlyInitializing` functions can be used to initialize parent contracts. Equivalent to `reinitializer(1)`.
+    /* @dev
+     * The purpose of the following modifier is to create a protected initializer function that can be invoked at most once in a contract.
+     * It ensures that the initialization logic defined within this modifier's scope is executed only once, during the contract deployment.
+     * In its scope, `onlyInitializing` functions can be used to initialize parent contracts. Equivalent to `reinitializer(1)`.
      */
     modifier initializer() {
         bool isTopLevelCall = _setInitializedVersion(1);

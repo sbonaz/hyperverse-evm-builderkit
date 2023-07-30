@@ -4,10 +4,6 @@ pragma solidity >=0.6.0 <0.9.0; //^0.8.0;
 import "./hyperverse/IHyperverseModule.sol";
 import "@openzeppelin/contracts/proxy/clone/CloneFactory.sol";
 
-/* solhint-disable max-line-length
-solhint-disable no-inline-assembl
-*/
-
 contract CloneFactory {
     // The createClone function now uses the ERC1967Proxy constructor to create a minimal proxy clone of the target contract.
     function createClone(address target) internal returns (address result) {

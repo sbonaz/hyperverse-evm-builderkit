@@ -33,7 +33,7 @@ contract ManageFunds {
     }
 
     //***** Functions ***
-    function deposit() public payable {
+    function deposit() public payable minimumRequire {
         addressToAmount[msg.sender] += msg.value;
         depositors.push(msg.sender);                                                // add the sender to the list of depositors
         emit DepositRecieved(msg.sender, msg.value);    
